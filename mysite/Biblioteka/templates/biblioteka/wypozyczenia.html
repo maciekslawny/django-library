@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+
+{% block content %}
+
+<div class="container pt-3">
+    <h3>Twoje wypozyczenia</h3>
+    <h4>- Książki:</h4>
+    <ul>
+        {% for ksiazka in ksiazki %}
+        <li class="mb-2">{{ksiazka.tytul}} | Autor: {{ksiazka.autor}} | Gatunek: {{ksiazka.gatunek}}  <a href='/biblioteka/zwroc/ksiazki/{{ksiazka.id}}' class='btn btn-info btn-sm'>Oddaj</a></li>
+        {% endfor %}
+        
+    </ul>
+</div>
+
+{% endblock %}
