@@ -30,6 +30,11 @@
               <li class="nav-item">
                 <a class="nav-link" href="/biblioteka/wypozyczenia" >Twoje wypożyczenia</a>
               </li>
+              {% if user.is_superuser %}
+              <li class="nav-item">
+                <a class="nav-link" href="/biblioteka/strona-edycja" >Edycja</a>
+              </li>
+              {% endif %}
               {% if request.user.is_authenticated %}
               <li>
                 {{request.user}}

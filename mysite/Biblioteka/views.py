@@ -3,6 +3,8 @@ from django.shortcuts import get_object_or_404, render, get_list_or_404, redirec
 from .models import Ksiazka
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
+from django.db import IntegrityError
+from django.contrib.auth.forms import AuthenticationForm
 
 # Create your views here.
 
@@ -17,6 +19,40 @@ def ksiazki(request):
     except:
         ksiazki = None
     return render(request, 'biblioteka/ksiazki.html', {'ksiazki': ksiazki})
+
+
+def edycja(request, zadanie, rodzaj, item_id):
+    if rodzaj == 'ksiazki':
+        autor = request.POST.get('autor')
+        tytul = request.POST.get('tytul')
+        gatunek = request.POST.get('gatunek')
+        isbn = request.POST.get('isbn')
+        wypozyczajacy = request.POST.get('wypozyczajacy')
+        if zadanie == 'dodaj':
+            try:
+                ksiazka = Ksiazka.objects.create(autor=autor, tytul=tytul, gatunek=gatunek, ISBN=isbn,)
+                ksiazka.save()
+            except:
+                return redirect('strona-edycja')
+        elif zadanie == 'edycja':
+            ksiazka = Ksiazka.objects.get(id = item_id)
+            
+            ksiazka.autor = autor
+            ksiazka.tytul = tytul
+            ksiazka.gatunek = gatunek
+            ksiazka.ISBN = isbn
+            try:
+                ksiazka.save()
+            except:
+                return redirect('strona-edycja')
+            
+
+    return redirect('strona-edycja')
+
+
+
+
+
 
 def wypozycz(request, rodzaj, item_id):
     username = request.user
@@ -36,7 +72,12 @@ def zwroc(request, rodzaj, item_id):
         item.save()
     return redirect('wypozyczenia')
 
-
+def strona_edycja(request):
+    try:
+        ksiazki = get_list_or_404(Ksiazka)
+    except:
+        ksiazki = None
+    return render(request, 'biblioteka/edycja_admin.html', {'ksiazki': ksiazki})
 
 @login_required(login_url='loginPage')
 def wypozyczenia(request):

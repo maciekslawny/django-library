@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+
+
+{% block content %}
+
+<div class="container pt-3">
+    <h3>Książki: <a href='' class='btn btn-info btn-sm' data-bs-toggle="modal" data-bs-target="#ksiazki-dodaj">Dodaj książkę</a></h3>
+ 
+    <!-- Modal DODAJ KSIĄŻKĘ -->
+    <div class="modal fade" id="ksiazki-dodaj" tabindex="-1" aria-labelledby="exampleModalLabelDodaj" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabelDodaj">Edycja</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form action="/biblioteka/dodaj/ksiazki/1"  method="post">
+                    {% csrf_token %}
+                    <div class="modal-body">
+                         
+                        <input type="text" class="form-control my-1" placeholder="Tytuł" value="{{ksiazka.tytul}}" name='tytul'>
+                        <input type="text" class="form-control my-1" placeholder="Autor" value="{{ksiazka.autor}}" name='autor'>
+                        <input type="text" class="form-control my-1" placeholder="Gatunek" value="{{ksiazka.gatunek}}" name='gatunek'>
+                        <input type="text" class="form-control my-1" placeholder="ISBN" value="{{ksiazka.ISBN}}" name='isbn'>
+                        <input type="text" class="form-control my-1" placeholder="Wypożyczający" value="{{ksiazka.wypozyczajacy}}" name='wypozyczajacy'>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Zamknij</button>
+                        <button type="submit" class="btn btn-primary">Dodaj</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <ul>
+        {% for ksiazka in ksiazki %}
+
+       <!-- Modal EDYCJA -->
+        <div class="modal fade" id="ksiazki-{{ksiazka.id}}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">Edycja</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <form action="/biblioteka/edycja/ksiazki/{{ksiazka.id}}"  method="post">
+                        {% csrf_token %}
+                        <div class="modal-body">
+                             
+                            <input type="text" class="form-control my-1" placeholder="Tytuł" value="{{ksiazka.tytul}}" name='tytul'>
+                            <input type="text" class="form-control my-1" placeholder="Autor" value="{{ksiazka.autor}}" name='autor'>
+                            <input type="text" class="form-control my-1" placeholder="Gatunek" value="{{ksiazka.gatunek}}" name='gatunek'>
+                            <input type="text" class="form-control my-1" placeholder="ISBN" value="{{ksiazka.ISBN}}" name='isbn'>
+                            <input type="text" class="form-control my-1" disabled placeholder="Wypożyczający" value="{{ksiazka.wypozyczajacy}}" name='wypozyczajacy'>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Zamknij</button>
+                            <button type="submit" class="btn btn-primary">Zapisz</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>    
+
+
+
+        <li class="mb-2">{{ksiazka.tytul}} | Autor: {{ksiazka.autor}} | Gatunek: {{ksiazka.gatunek}} <a href='' class='btn btn-info btn-sm' data-bs-toggle="modal" data-bs-target="#ksiazki-{{ksiazka.id}}">Edytuj</a></li>
+        
+        {% endfor %}
+        
+    </ul>
+</div>
+
+{% endblock %}
