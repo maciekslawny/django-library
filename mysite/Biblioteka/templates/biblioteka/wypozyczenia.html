@@ -12,6 +12,19 @@
         {% endfor %}
         
     </ul>
+    <h4>- Filmy:</h4>
+    <ul>
+        {% for film in filmy %}
+        <li class="mb-2">{{film.tytul}} | Reżyser: {{film.rezyser}} | Gatunek: {{film.gatunek}}  <a href='/biblioteka/zwroc/filmy/{{film.id}}' class='btn btn-info btn-sm'>Oddaj</a></li>
+        {% endfor %}
+    </ul>
+
+    <h4>- Płyty muzyczne:</h4>
+    <ul>    
+        {% for plyta in plyty %}
+        <li class="mb-2">{{plyta.tytul}} | Zespół: {{plyta.zespol}} | Gatunek: {{plyta.gatunek}}  <a href='/biblioteka/zwroc/plyty/{{plyta.id}}' class='btn btn-info btn-sm'>Oddaj</a></li>
+        {% endfor %}
+    </ul>
 </div>
 
 {% endblock %}

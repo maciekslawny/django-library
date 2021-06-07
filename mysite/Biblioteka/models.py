@@ -3,6 +3,9 @@ from django.conf import settings
 # Create your models here.
 
 
+
+
+
 class Ksiazka(models.Model):
     id = models.AutoField(primary_key=True)
     autor = models.CharField(max_length=200)
@@ -23,6 +26,7 @@ class Film(models.Model):
     tytul = models.CharField(max_length=200)
     gatunek = models.CharField(max_length=200) 
     czas_trwania = models.IntegerField()
+    wypozyczajacy = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, blank=True, null=True)
     class Meta:
         unique_together = ('rezyser', 'tytul', 'czas_trwania',)
     
@@ -31,12 +35,13 @@ class Film(models.Model):
     def __str__(self):
         return self.tytul
 
-class CD(models.Model):
+class Plyta(models.Model):
     zespol = models.CharField(max_length=200)
     tytul = models.CharField(max_length=200)
     gatunek = models.CharField(max_length=200)
     lista_utworow = models.CharField(max_length=200)
     czas_trwania = models.IntegerField()
+    wypozyczajacy = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, blank=True, null=True)
     def __str__(self):
         return self.tytul
 

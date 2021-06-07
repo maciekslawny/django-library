@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+
+{% block content %}
+
+<div class="container pt-3">
+    <h3>Lista dostępnych płyt muzycznych:</h3>
+    <ul>
+        {% for plyta in plyty %}
+        <li class="mb-2">{{plyta.tytul}} | Autor: {{plyta.zespol}} | Gatunek: {{plyta.gatunek}} <a href='/biblioteka/wypozycz/plyty/{{plyta.id}}' class='btn btn-info btn-sm'>Wypożycz</a></li>
+        {% endfor %}
+        
+    </ul>
+</div>
+
+{% endblock %}

@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+
+{% block content %}
+
+<div class="container pt-3">
+    <h3>Lista dostępnych filmów:</h3>
+    <ul>
+        {% for film in filmy %}
+        <li class="mb-2">{{film.tytul}} | Autor: {{film.rezyser}} | Gatunek: {{film.gatunek}} <a href='/biblioteka/wypozycz/filmy/{{film.id}}' class='btn btn-info btn-sm'>Wypożycz</a></li>
+        {% endfor %}
+        
+    </ul>
+</div>
+
+{% endblock %}

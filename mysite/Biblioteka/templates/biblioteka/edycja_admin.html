@@ -4,14 +4,14 @@
 {% block content %}
 
 <div class="container pt-3">
+
     <h3>Książki: <a href='' class='btn btn-info btn-sm' data-bs-toggle="modal" data-bs-target="#ksiazki-dodaj">Dodaj książkę</a></h3>
- 
     <!-- Modal DODAJ KSIĄŻKĘ -->
     <div class="modal fade" id="ksiazki-dodaj" tabindex="-1" aria-labelledby="exampleModalLabelDodaj" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="exampleModalLabelDodaj">Edycja</h5>
+                    <h5 class="modal-title" id="exampleModalLabelDodaj">Dodawanie książki</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <form action="/biblioteka/dodaj/ksiazki/1"  method="post">
@@ -22,7 +22,6 @@
                         <input type="text" class="form-control my-1" placeholder="Autor" value="{{ksiazka.autor}}" name='autor'>
                         <input type="text" class="form-control my-1" placeholder="Gatunek" value="{{ksiazka.gatunek}}" name='gatunek'>
                         <input type="text" class="form-control my-1" placeholder="ISBN" value="{{ksiazka.ISBN}}" name='isbn'>
-                        <input type="text" class="form-control my-1" placeholder="Wypożyczający" value="{{ksiazka.wypozyczajacy}}" name='wypozyczajacy'>
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Zamknij</button>
@@ -34,13 +33,12 @@
     </div>
     <ul>
         {% for ksiazka in ksiazki %}
-
        <!-- Modal EDYCJA -->
         <div class="modal fade" id="ksiazki-{{ksiazka.id}}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
             <div class="modal-dialog">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title" id="exampleModalLabel">Edycja</h5>
+                        <h5 class="modal-title" id="exampleModalLabel">Edycja książki</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <form action="/biblioteka/edycja/ksiazki/{{ksiazka.id}}"  method="post">
@@ -53,6 +51,71 @@
                             <input type="text" class="form-control my-1" placeholder="ISBN" value="{{ksiazka.ISBN}}" name='isbn'>
                             <input type="text" class="form-control my-1" disabled placeholder="Wypożyczający" value="{{ksiazka.wypozyczajacy}}" name='wypozyczajacy'>
                         </div>
+
+
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Zamknij</button>
+                            <button type="submit" class="btn btn-primary">Zapisz</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>    
+        <li class="mb-2">{{ksiazka.tytul}} | Autor: {{ksiazka.autor}} | Gatunek: {{ksiazka.gatunek}} <a href='' class='btn btn-info btn-sm' data-bs-toggle="modal" data-bs-target="#ksiazki-{{ksiazka.id}}">Edytuj</a><a href='/biblioteka/usun/ksiazki/{{ksiazka.id}}' class='btn ms-2 btn-danger btn-sm'>Usun</a></li>
+        
+        {% endfor %}
+    </ul>
+ 
+    
+    <h3>Filmy: <a href='' class='btn btn-info btn-sm' data-bs-toggle="modal" data-bs-target="#filmy-dodaj">Dodaj film</a></h3>
+    <!-- Modal DODAJ FILM -->
+    <div class="modal fade" id="filmy-dodaj" tabindex="-1" aria-labelledby="exampleModalLabelDodaj" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabelDodaj">Dodawanie filmu</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form action="/biblioteka/dodaj/filmy/1"  method="post">
+                    {% csrf_token %}
+                    <div class="modal-body">
+                         
+                        <input type="text" class="form-control my-1" placeholder="Tytuł" value="{{film.tytul}}" name='tytul'>
+                        <input type="text" class="form-control my-1" placeholder="Rezyser" value="{{film.rezyser}}" name='rezyser'>
+                        <input type="text" class="form-control my-1" placeholder="Gatunek" value="{{film.gatunek}}" name='gatunek'>
+                        <input type="number" class="form-control my-1" placeholder="Czas trwania" value="{{film.czas_trwania}}" name='czas_trwania'>
+
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Zamknij</button>
+                        <button type="submit" class="btn btn-primary">Dodaj</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <ul>
+        {% for film in filmy %}
+       <!-- Modal EDYCJA -->
+        <div class="modal fade" id="filmy-{{film.id}}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">Edycja filmu</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <form action="/biblioteka/edycja/filmy/{{film.id}}"  method="post">
+                        {% csrf_token %}
+                        <div class="modal-body">
+                             
+                            <input type="text" class="form-control my-1" placeholder="Tytuł" value="{{film.tytul}}" name='tytul'>
+                            <input type="text" class="form-control my-1" placeholder="Autor" value="{{film.rezyser}}" name='rezyser'>
+                            <input type="text" class="form-control my-1" placeholder="Gatunek" value="{{film.gatunek}}" name='gatunek'>
+                            <input type="number" class="form-control my-1" placeholder="Cas trwania" value="{{film.czas_trwania}}" name='czas_trwania'>
+                            <input type="text" class="form-control my-1" disabled placeholder="Wypożyczający" value="{{film.wypozyczajacy}}" name='wypozyczajacy'>
+                        </div>
+
+
                         <div class="modal-footer">
                             <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Zamknij</button>
                             <button type="submit" class="btn btn-primary">Zapisz</button>
@@ -62,13 +125,76 @@
             </div>
         </div>    
 
-
-
-        <li class="mb-2">{{ksiazka.tytul}} | Autor: {{ksiazka.autor}} | Gatunek: {{ksiazka.gatunek}} <a href='' class='btn btn-info btn-sm' data-bs-toggle="modal" data-bs-target="#ksiazki-{{ksiazka.id}}">Edytuj</a></li>
+        <li class="mb-2">{{film.tytul}} | Autor: {{film.rezyser}} | Gatunek: {{film.gatunek}} <a href='' class='btn btn-info btn-sm' data-bs-toggle="modal" data-bs-target="#filmy-{{film.id}}">Edytuj</a><a href='/biblioteka/usun/filmy/{{film.id}}' class='btn ms-2 btn-danger btn-sm'>Usun</a></li>
         
         {% endfor %}
-        
     </ul>
+
+
+    <h3>Płyty muzyczne: <a href='' class='btn btn-info btn-sm' data-bs-toggle="modal" data-bs-target="#plyty-dodaj">Dodaj płytę</a></h3>
+    <!-- Modal DODAJ PŁYTĘ -->
+    <div class="modal fade" id="plyty-dodaj" tabindex="-1" aria-labelledby="exampleModalLabelDodaj" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLabelDodaj">Dodawanie płyty</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form action="/biblioteka/dodaj/plyty/1"  method="post">
+                    {% csrf_token %}
+                    <div class="modal-body">
+                         
+                        <input type="text" class="form-control my-1" placeholder="Tytuł" value="{{plyta.tytul}}" name='tytul'>
+                        <input type="text" class="form-control my-1" placeholder="Zespół" value="{{plyta.zespol}}" name='zespol'>
+                        <input type="text" class="form-control my-1" placeholder="Gatunek" value="{{plyta.gatunek}}" name='gatunek'>
+                        <input type="text" class="form-control my-1" placeholder="Lista Utworow" value="{{plyta.lista_utworow}}" name='lista_utworow'>
+                        <input type="number" class="form-control my-1" placeholder="Czas trwania" value="{{plyta.czas_trwania}}" name='czas_trwania'>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Zamknij</button>
+                        <button type="submit" class="btn btn-primary">Dodaj</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <ul>
+        {% for plyta in plyty %}
+       <!-- Modal EDYCJA -->
+        <div class="modal fade" id="plyty-{{plyta.id}}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">Edycja płyty</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <form action="/biblioteka/edycja/plyty/{{plyta.id}}"  method="post">
+                        {% csrf_token %}
+                        <div class="modal-body">
+                             
+                            <input type="text" class="form-control my-1" placeholder="Tytuł" value="{{plyta.tytul}}" name='tytul'>
+                            <input type="text" class="form-control my-1" placeholder="Zespół" value="{{plyta.zespol}}" name='zespol'>
+                            <input type="text" class="form-control my-1" placeholder="Gatunek" value="{{plyta.gatunek}}" name='gatunek'>
+                            <input type="text" class="form-control my-1" placeholder="Lista Utworow" value="{{plyta.lista_utworow}}" name='lista_utworow'>
+                            <input type="number" class="form-control my-1" placeholder="Czas trwania" value="{{plyta.czas_trwania}}" name='czas_trwania'>
+                            <input type="text" class="form-control my-1" placeholder="Wypożyczający" value="{{plyta.wypozyczajacy}}" name='wypozyczajacy' disabled>
+                        </div>
+
+
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Zamknij</button>
+                            <button type="submit" class="btn btn-primary">Zapisz</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>    
+
+        <li class="mb-2">{{plyta.tytul}} | Zezpół: {{plyta.zespol}} | Gatunek: {{plyta.gatunek}} <a href='' class='btn btn-info btn-sm' data-bs-toggle="modal" data-bs-target="#plyty-{{plyta.id}}">Edytuj</a><a href='/biblioteka/usun/plyty/{{plyta.id}}' class='btn ms-2 btn-danger btn-sm'>Usun</a></li>
+        
+        {% endfor %}
+    </ul>
+
 </div>
 
 {% endblock %}
