@@ -1,9 +1,9 @@
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, render, get_list_or_404, redirect
-from .models import Ksiazka, Film, Plyta
+from .models import Ksiazka, Film, Plyta, Wypozyczenie
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
-
+import datetime
 # Create your views here.
 
 
@@ -25,7 +25,7 @@ def filmy(request):
         filmy = None
     return render(request, 'biblioteka/filmy.html', {'filmy': filmy})
 
-def muzyka(request):
+def plyty(request):
     try:
         plyty = get_list_or_404(Plyta, wypozyczajacy=None)
     except:
@@ -163,26 +163,36 @@ def edycja(request, zadanie, rodzaj, item_id):
 
 
 def wypozycz(request, rodzaj, item_id):
-    username = request.user
+    username = request.user 
+    wypozyczenie = Wypozyczenie.objects.create(rzecz=rodzaj, item_id=item_id, data_wypozyczenia=datetime.datetime.now(), wypozyczajacy=username,)
+
     if rodzaj == 'ksiazki':
         print(rodzaj, item_id)
         item = Ksiazka.objects.get(id = item_id)
         item.wypozyczajacy = username
         item.save()
-        return redirect('ksiazki')
     elif rodzaj == 'filmy':
         item = Film.objects.get(id = item_id)
         item.wypozyczajacy = username
         item.save()
-        return redirect('filmy')
     elif rodzaj == 'plyty':
         item = Plyta.objects.get(id = item_id)
         item.wypozyczajacy = username
         item.save()
-        return redirect('muzyka')
+
+    wypozyczenie.gatunek = item.gatunek  
+    wypozyczenie.tytul = item.tytul
+    wypozyczenie.save()
+    return redirect(f'{rodzaj}')
 
 
 def zwroc(request, rodzaj, item_id):
+    try:
+        wypozyczenie = Wypozyczenie.objects.get(item_id = item_id, data_zwrotu = None)  
+        wypozyczenie.data_zwrotu = datetime.datetime.now()
+        wypozyczenie.save()
+    except:
+        pass
     if rodzaj == 'ksiazki':
         print(rodzaj, item_id)
         item = Ksiazka.objects.get(id = item_id)
@@ -231,6 +241,53 @@ def wypozyczenia(request):
     return render(request, 'biblioteka/wypozyczenia.html', {'ksiazki': ksiazki,'filmy':filmy, 'plyty':plyty})
 
 
+def statystyki(request, date_from, date_to):
+    if request.method == 'POST':
+        date_from = request.POST.get('date_from')
+        date_to = request.POST.get('date_to')
+        print('test: ', date_from)
+    wypozyczenia = get_list_or_404(Wypozyczenie)
+    date_from = datetime.datetime.strptime(date_from, "%Y-%m-%d")
+    date_to = datetime.datetime.strptime(date_to, "%Y-%m-%d")
+    wypozyczenia_ksiazki = []
+    gatunek_ksiazki = {}
+    wypozyczenia_filmy = []
+    gatunek_filmy = {}
+    wypozyczenia_muzyka = []
+    gatunek_muzyka = {}
+    for item in wypozyczenia:
+        item_date = datetime.datetime.strptime(str(item.data_wypozyczenia)[0:10], "%Y-%m-%d") 
+        if (item_date > date_from and item_date < date_to):
+            if item.rzecz == 'ksiazki':
+                item = {'id': item.id, 'gatunek': item.gatunek, 'wypozajacy': item.wypozyczajacy}
+                wypozyczenia_ksiazki.append(item)
+            elif item.rzecz == 'filmy':
+                item = {'id': item.id, 'gatunek': item.gatunek, 'wypozajacy': item.wypozyczajacy}
+                wypozyczenia_filmy.append(item)
+            elif item.rzecz == 'plyty':
+                item = {'id': item.id, 'gatunek': item.gatunek, 'wypozajacy': item.wypozyczajacy}
+                wypozyczenia_muzyka.append(item)
+
+    for item in wypozyczenia_ksiazki:
+        if item['gatunek'] in gatunek_ksiazki:
+            gatunek_ksiazki[f"{item['gatunek']}"] += 1
+        else:
+            gatunek_ksiazki[f"{item['gatunek']}"] = 1
+    for item in wypozyczenia_filmy:
+        if item['gatunek'] in gatunek_filmy:
+            gatunek_filmy[f"{item['gatunek']}"] += 1
+        else:
+            gatunek_filmy[f"{item['gatunek']}"] = 1
+    for item in wypozyczenia_muzyka:
+        if item['gatunek'] in gatunek_muzyka:
+            gatunek_muzyka[f"{item['gatunek']}"] += 1
+        else:
+            gatunek_muzyka[f"{item['gatunek']}"] = 1
+
+    
+    print (gatunek_filmy, gatunek_muzyka)
+
+    return render(request, 'biblioteka/statystyki.html', {'gatunek_ksiazki': gatunek_ksiazki, 'gatunek_filmy': gatunek_filmy, 'gatunek_muzyka': gatunek_muzyka, 'date_from': str(date_from)[0:10], 'date_to': str(date_to)[0:10]})    
 
 def loginPage(request):
     if request.user.is_authenticated:
