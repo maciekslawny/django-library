@@ -15,8 +15,8 @@
     <h3>Książki:</h3>
     <ul>
  
-        {% for key, value in gatunek_ksiazki.items %}
-        <li class="mb-2">{{key}} | {{value}}  </li>
+        {% for item in gatunek_ksiazki %}
+        <li class="mb-2">{{item.0}} | {{item.1}}  </li>
         {% endfor %}
         
     </ul>
@@ -24,8 +24,8 @@
     <h3>Filmy:</h3>
     <ul>
  
-        {% for key, value in gatunek_filmy.items %}
-        <li class="mb-2">{{key}} | {{value}}  </li>
+        {% for item in gatunek_filmy %}
+        <li class="mb-2">{{item.0}} | {{item.1}}  </li>
         {% endfor %}
         
     </ul>
@@ -34,8 +34,8 @@
     <h3>Płyty muzyczne:</h3>
     <ul>
  
-        {% for key, value in gatunek_muzyka.items %}
-        <li class="mb-2">{{key}} | {{value}}  </li>
+        {% for item in gatunek_muzyka %}
+        <li class="mb-2">{{item.0}} | {{item.1}}  </li>
         {% endfor %}
         
     </ul>
