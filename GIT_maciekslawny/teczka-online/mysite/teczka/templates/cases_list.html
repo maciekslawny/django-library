@@ -1,0 +1,343 @@
+{% extends "base.html" %}
+{% load custom_tags %}
+
+{% block content %}
+<button class="btn btn-primary my-2" data-bs-toggle="modal" data-bs-target="#add-case"><i class="fas fa-plus"></i> Dodaj spedycję </button>
+<!-- Modal ADD CASE -->
+<div class="modal fade" id="add-case" tabindex="-1" aria-labelledby="exampleModalLabelDodaj" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabelDodaj">Dodawanie spedycji</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form action="/teczka/add-case/"  method="post">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <div class="container">
+                        <div class="row mb-2">
+                            <input type="text" class="form-control me-1 col" placeholder="Numer spedycji"name='case_number'>
+                            <input type="text" class="form-control ms-1 col" placeholder="Firma" name='company'>    
+                        </div> 
+                        <div class="row my-2">
+                            
+                            <input type="text" class="form-control me-1 col" placeholder="Booking" name='booking'>
+                            <input type="number" class="form-control ms-1 col" placeholder="Rok" name='year' value="2021">    
+                        </div>
+                        <div class="row my-2">
+                            <input type="text" class="form-control me-1 col" placeholder="Miejsce załadunku" name='load_place'>
+                            <input type="text" class="form-control ms-1 col" placeholder="Destynacja" name='destination'>    
+                        </div>
+                    </div>  
+
+
+                    <select class="form-select form-select my-2" aria-label=".form-select example" name='shipowner'>
+                                <option value="maersk">Maersk</option>
+                                <option value="cma">CMA</option>
+                                <option value="msc">MSC</option>
+                                <option value="hapag">Hapag</option>
+                              </select> 
+                    <div class="input-group my-2">
+                        <span class="input-group-text" id="basic-addon3">Kontenery: </span>
+                        <input type="number" placeholder="Ilość" class="form-control" name="amount" aria-describedby="basic-addon3">
+                        <select class="form-select form-select" aria-label=".form-select example" name='container_type'>
+                            <option value="40dv">40 dv</option>
+                            <option value="40hc">40 hc</option>
+                            <option value="40rf">40 rf</option>
+                            <option value="20dv">20 dv</option>
+                            <option value="20rf">20 rf</option>
+                        </select> 
+                    </div>
+
+
+                    <div class="input-group my-2">
+                        <span class="input-group-text" id="basic-addon3">ETD: </span>
+                        <input type="date" class="form-control" name="etd" aria-describedby="basic-addon3">
+                        <span class="input-group-text" id="basic-addon3">ETA: </span>
+                        <input type="date" class="form-control" name="eta" aria-describedby="basic-addon3">
+                    </div>
+
+                    <div class="input-group my-2">
+                        <span class="input-group-text" id="basic-addon3">Data załadunku: </span>
+                        <input type="date" class="form-control" name="loading_data" aria-describedby="basic-addon3">
+                    </div>
+                    <div class="input-group my-2">
+                        <span class="input-group-text" id="basic-addon3">Cut off: </span>
+                        <input type="datetime-local" class="form-control" name="cut_off" aria-describedby="basic-addon3">
+                        
+                    </div>
+
+                    <textarea class="form-control my-2"  rows="1" name="description" >Opcjonalny opis..</textarea>
+
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" name="si" checked>
+                        <label class="form-check-label" for="SI">BL do zrobienia</label>
+                    </div>
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" name="coo" checked>
+                        <label class="form-check-label" for="COO">COO do zrobienia</label>
+                    </div>
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" name="insurance" checked>
+                        <label class="form-check-label" for="insurance">Ubezpieczenie do zrobienia</label>
+                    </div>
+                    
+                    <input type="radio" class="btn-check" name="import_export_add" id="exp_add" value='exp' autocomplete="off" checked>
+                    <label class="btn btn-outline-primary" for="exp_add">Export</label>
+                    
+                    <input type="radio" class="btn-check" name="import_export_add" id="imp_add" value='imp' autocomplete="off">
+                    <label class="btn btn-outline-primary" for="imp_add">Import</label>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Zamknij</button>
+                    <button type="submit" class="btn btn-primary">Dodaj</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+
+
+<table class="table table-hover table-striped">
+    <thead>
+        <tr>
+            <th class="col">Firma</th>
+            <th class="col">Spedycja</th>
+            <th class="col">Booking</th>
+            <th class="col">Cut off</th>
+            <th class="col">SI</th>
+            <th class="col">COO</th>
+            <th class="col">Insurance</th>
+            <th class="col">Opis</th>
+            <th class="col">Opcje</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for case in page_obj %}
+
+
+  
+        <!-- Modal EDIT CASE -->
+        <div class="modal fade" id="edit-case-{{ case.id }}" tabindex="-1" aria-labelledby="exampleModalLabelDodaj" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabelDodaj">Edycja spedycji {{ case.case_number }}</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+        
+                    <nav>
+                        <div class="nav nav-tabs" id="nav-tab" role="tablist">
+                          <button class="nav-link active" id="nav-home-tab" data-bs-toggle="tab" data-bs-target="#nav-home-{{case.id}}" type="button" role="tab" aria-controls="nav-home" aria-selected="true">Home</button>
+                          <button class="nav-link" id="nav-profile-tab" data-bs-toggle="tab" data-bs-target="#nav-profile-{{case.id}}" type="button" role="tab" aria-controls="nav-profile" aria-selected="false">Zaawansowane</button>
+        
+                        </div>
+                    </nav>
+        
+                    <form action="/teczka/edit-case/{{case.id}}"  method="post">
+                        {% csrf_token %}
+                        <div class="tab-content" id="nav-tabContent">
+                            <!-- Podstawowe -->
+                            <div class="tab-pane fade show active" id="nav-home-{{case.id}}" role="tabpanel" aria-labelledby="nav-home-tab">
+                                
+                                <div class="modal-body"> 
+                                    <div class="input-group my-2">
+                                        <span class="input-group-text w-25" id="basic-addon3">Draft BL:</span>
+                                        
+                                        <select class="form-select form-select" aria-label=".form-select example" name='si'>
+                                            <option {% if case.si == '' %} selected {% endif %} value="">-</option>     
+                                            <option {% if case.si == 'waiting' %} selected {% endif %}  value="waiting">Do wprowadzenia</option>
+                                            <option {% if case.si == 'submited' %} selected {% endif %} value="submited">Wprowadzone</option>
+                                            <option {% if case.si == 'checking' %} selected {% endif %}  value="checking">Wysłane do sprawdzenia</option>
+                                            <option {% if case.si == 'amended' %} selected {% endif %} value="amended">Wprowadzone poprawki</option>
+                                            <option {% if case.si == 'accepted' %} selected {% endif %}  value="accepted">Zaakceptowane</option>
+                                            <option {% if case.si == 'sent' %} selected {% endif %} value="sent">Oryginał wysłany</option>                                              
+                                        </select> 
+                                    </div>
+                                    <div class="input-group my-2">
+                                        <span class="input-group-text w-25" id="basic-addon3">Draft COO: </span>
+                                        
+                                        <select class="form-select form-select" aria-label=".form-select example" name='coo'>
+                                            <option {% if case.coo == '' %} selected {% endif %} value="">-</option>     
+                                            <option {% if case.coo == 'waiting' %} selected {% endif %}  value="waiting">Do wprowadzenia</option>
+                                            <option {% if case.coo == 'submited' %} selected {% endif %} value="submited">Wprowadzone</option>
+                                            <option {% if case.coo == 'checking' %} selected {% endif %}  value="checking">Wysłane do sprawdzenia</option>
+                                            <option {% if case.coo == 'amended' %} selected {% endif %} value="amended">Wprowadzone poprawki</option>
+                                            <option {% if case.coo == 'accepted' %} selected {% endif %}  value="accepted">Zaakceptowane</option>
+                                            <option {% if case.coo == 'sent' %} selected {% endif %} value="sent">Oryginał wysłany</option>                                              
+                                        </select> 
+                                    </div>
+                                    <div class="input-group my-2">
+                                        <span class="input-group-text w-25" id="basic-addon3">Ubezpieczenie: </span>
+                                        
+                                        <select class="form-select form-select" aria-label=".form-select example" name='insurance'>
+                                            <option {% if case.insurance == '' %} selected {% endif %} value="">-</option>     
+                                            <option {% if case.insurance == 'waiting' %} selected {% endif %}  value="waiting">Do wprowadzenia</option>
+                                            <option {% if case.insurance == 'submited' %} selected {% endif %} value="submited">Wprowadzone</option>
+                                            <option {% if case.insurance == 'checking' %} selected {% endif %}  value="checking">Wysłane do sprawdzenia</option>
+                                            <option {% if case.insurance == 'amended' %} selected {% endif %} value="amended">Wprowadzone poprawki</option>
+                                            <option {% if case.insurance == 'accepted' %} selected {% endif %}  value="accepted">Zaakceptowane</option>
+                                            <option {% if case.insurance == 'sent' %} selected {% endif %} value="sent">Oryginał wysłany</option>                                              
+                                        </select> 
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox"  id="defaultCheck1" name='customs' {% if case.customs %} checked  {% endif %}>
+                                        <label class="form-check-label" for="defaultCheck1">
+                                          Odprawione
+                                        </label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox"  id="defaultCheck1" name='vgm' {% if case.vgm %} checked  {% endif %}>
+                                        <label class="form-check-label" for="defaultCheck1">
+                                          VGM
+                                        </label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" {% if case.invoice %} checked  {% endif %}id="defaultCheck2" name='invoice'>
+                                        <label class="form-check-label" for="defaultCheck2">
+                                          Faktura wystawiona
+                                        </label>
+                                    </div>
+        
+                                        
+                                        <textarea class="form-control mt-2"  rows="2" placeholder="Opcjonalny opis.." name="description" >{{case.description}}</textarea>
+                                        <textarea class="form-control mt-2"  rows="1" placeholder="Numery kontenerów" name="container_numbers" >{{case.container_numbers}}</textarea>
+                                
+        
+                                    
+                                    <div class="input-group my-2">
+                                        <span class="input-group-text" id="basic-addon3"><b>Status spedycji:</b> </span>
+                                        
+                                        <select class="form-select form-select" aria-label=".form-select example" name='case_status'>
+                                             
+                                            <option {% if case.case_status == 'active' %} selected {% endif %}  value="active">W trakcie</option>
+                                            <option {% if case.case_status == 'ended' %} selected {% endif %} value="ended">Zakończona</option>
+                                            
+                                        </select> 
+                                    </div>
+                        
+                                </div>     
+                                
+                            </div>
+                            <!-- Zaawansowane -->
+                            <div class="tab-pane fade" id="nav-profile-{{case.id}}" role="tabpanel" aria-labelledby="nav-profile-tab">
+                                <div class="modal-body">
+                                    <div class="container">
+                                        <div class="row my-2">
+                                            <input type="text" class="form-control  col" placeholder="Numer spedycji"name='case_number' value='{{ case.case_number }}'>
+                                            <input type="text" class="form-control ms-2 col" placeholder="Firma" name='company' value='{{ case.company }}'>   
+                                            <input type="text" class="form-control ms-2 col" placeholder="Rok" name='year' value='{{ case.year }}'>  
+                                        </div> 
+                                        <div class="row my-2">
+                                            
+                                            <input type="text" class="form-control  col" placeholder="Booking" name='booking' value='{{ case.booking }}'>
+                                            
+                                            <input type="text" class="form-control ms-2 col" placeholder="Oferta" name='offer_number' value='{{ case.offer_number }}'>
+                                               
+                                        </div>
+                                        <div class="row my-2">
+                                            <input type="text" class="form-control me-1 col" placeholder="Port załadunku" name='loading_port' value='{{ case.loading_port }}'>
+                                            <input type="text" class="form-control ms-1 col" placeholder="Destynacja" name='destination' value='{{ case.destination }}'>    
+                                        </div>
+                                    </div>  
+                
+                
+                                    <select class="form-select form-select my-2" aria-label=".form-select example" name='shipowner'>
+                                                <option {% if case.shipowner == 'maersk' %} selected {% endif %}  value="maersk">Maersk Line</option>
+                                                <option {% if case.shipowner == 'cma' %} selected {% endif %} value="cma">CMA</option>
+                                                <option {% if case.shipowner == 'msc' %} selected {% endif %} value="msc">MSC</option>
+                                                <option {% if case.shipowner == 'hapag' %} selected {% endif %} value="hapag">Hapag Lloyd</option>
+                                            </select> 
+                                 
+                                    <div class="input-group my-2">
+                                        <span class="input-group-text" id="basic-addon3">ETD: </span>
+                                        <input type="date" class="form-control" name="etd" aria-describedby="basic-addon3" value='{{ case.etd|date:"Y-m-d" }}'>
+                                        <span class="input-group-text" id="basic-addon3">ETA: </span>
+                                        <input type="date" class="form-control" name="eta" aria-describedby="basic-addon3" value='{{ case.eta|date:"Y-m-d" }}'>
+                                    </div>
+                                    <div class="input-group my-2">
+                                        <span class="input-group-text" id="basic-addon3">Cut off: </span>
+                                        <input type="datetime-local" class="form-control" name="cut_off" aria-describedby="basic-addon3" value='{{case.cut_off|date:"Y-m-d"}}T{{case.cut_off|time:"H:i:s"}}'>
+                                    </div>
+                                                    
+        
+        
+                                    <div class="input-group my-2">
+                                        <span class="input-group-text" id="basic-addon3">Ilość kont: </span>
+                                        <input type="number" placeholder="Ilość" class="form-control" name="amount" aria-describedby="basic-addon3" value='{{ case.amount }}'>
+                                        <select class="form-select form-select" aria-label=".form-select example" name='container_type'>
+                                            <option value="40dv" {% if case.container_type == '40dv' %} selected {% endif %}>40 dv</option>
+                                            <option value="40hc" {% if case.container_type == '40hc' %} selected {% endif %}>40 hc</option>
+                                            <option value="40rf" {% if case.container_type == '40rf' %} selected {% endif %}>40 rf</option>
+                                            <option value="20dv" {% if case.container_type == '20dv' %} selected {% endif %}>20 dv</option>
+                                            <option value="20rf" {% if case.container_type == '20rf' %} selected {% endif %}>20 rf</option>
+                                        </select> 
+                                    </div>   
+                
+                                    <div class="input-group my-2">
+                                        <span class="input-group-text" id="basic-addon3">Data załadunku: </span>
+                                        <input type="date" class="form-control" name="loading_data" aria-describedby="basic-addon3" value='{{ case.loading_data|date:"Y-m-d" }}'><input type="text" class="form-control col" placeholder="Miejsce zał." name='load_place' value='{{ case.load_place }}'>   
+                                    </div>
+                                    
+                                    <input type="radio" class="btn-check" name="import-export-edit" id="exp-edit-{{case.id}}" value='exp' autocomplete="off" {% if case.import_export == 'exp' %}checked {% endif %} >
+                                    <label class="btn btn-outline-primary" for="exp-edit-{{case.id}}">Export</label>
+                                    
+                                    <input type="radio" class="btn-check" name="import-export-edit" id="imp-edit-{{case.id}}" value='imp' autocomplete="off" {% if case.import_export == 'imp' %}checked {% endif %}>
+                                    <label class="btn btn-outline-primary" for="imp-edit-{{case.id}}">Import</label>
+                                    
+                                    
+                                </div>                                
+                            </div>
+        
+        
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Zamknij</button>
+                                <button type="submit" class="btn btn-primary">Zapisz</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+
+
+        <tr>
+            <th scope="row">{{ case.company }}</th>
+            <td><a href="/teczka/case-detail/{{ case.id }}">{{ case.case_number }}</a> </td>
+            <td>{{ case.booking }}</td>
+            <td>{{ case.cut_off|date:"j.m, H:i " }} {% if case.cut_off %}({% remaining_days_hours case.cut_off %}) {% endif %}</td>
+            <td>{% if case.si == '' %}-{% else %}{{ case.get_si_display }}{% endif %}</td>
+            <td {% if case.coo == 'sent' %} class="table-success" {% endif %}>{% if case.coo == '' %}-{% else %}{{ case.get_coo_display }}{% endif %}</td>
+            <td>{% if case.insurance == '' %}-{% else %}{{ case.get_insurance_display }}{% endif %}</td>
+            <td>{% if case.description %} {{ case.description|slice:":20" }}.. {% endif %}</td>
+            <td><button class='btn btn-primary btn-sm' data-bs-toggle="modal" data-bs-target="#edit-case-{{ case.id }}" ><i class="fas fa-pencil-alt"></i></button> <a class='btn btn-danger btn-sm' href="/teczka/delete-case/{{ case.id }}"><i class="fas fa-trash-alt"></i></a></td>
+
+        </tr>
+        {% endfor %}
+    </tbody>
+
+</table>
+
+
+<div class="pagination d-flex justify-content-center">
+    <span class="step-links">
+        {% if page_obj.has_previous %}
+            <a href="?page=1">&laquo; pierwsza</a>
+            <a href="?page={{ page_obj.previous_page_number }}">poprzednia</a>
+        {% endif %}
+
+        <span class="current">
+            Strona {{ page_obj.number }} z {{ page_obj.paginator.num_pages }}.
+        </span>
+
+        {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}">następna</a>
+            <a href="?page={{ page_obj.paginator.num_pages }}">ostatnia &raquo;</a>
+        {% endif %}
+    </span>
+</div>
+
+{% endblock %}

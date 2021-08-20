@@ -1,0 +1,259 @@
+{% extends "base.html" %}
+{% load custom_tags %}
+
+{% block content %}
+
+
+<div class="card my-5">
+    <h5 class="card-header">Spedycja {{ case.case_number }} - {{ case.get_import_export_display }}/{{ case.year }} <button class='btn btn-primary btn-sm me-1' data-bs-toggle="modal" data-bs-target="#edit-case-{{ case.id }}" ><i class="fas fa-pencil-alt"></i></button>
+      <a href="/teczka/generate-pdf/{{ case.id }}" class='btn btn-primary btn-sm'><i class="fas fa-file-pdf"></i></a></h5>
+    <div class="card-body">
+      
+      
+      <ul class="list-group list-group-flush">
+        <li class="list-group-item">Firma: <b>{{ case.company }}</b></li>
+        <li class="list-group-item">Rodzaj kont. / Numery kont. <b>{{ case.amount }} x {{ case.container_type }} / {{ case.container_numbers }}</b></li>
+      <li class="list-group-item">Miejsce zał. / Data zał. : <b>{{ case.load_place }} / {{ case.loading_data|date:"j.m" }}</b></li>
+      <li class="list-group-item">POL / POD: <b>{{ case.loading_port }} / {{ case.destination }}</b></li>
+      <li class="list-group-item">NR BKG / ARMATOR : <b>{{ case.booking }} / {{ case.get_shipowner_display }} </b></li>
+        <li class="list-group-item">ETD / ETA: <b>{{ case.etd|date:"j.m" }} / {{ case.eta|date:"j.m" }}</b> </li>
+        <li class="list-group-item">Cut Off: <b>{{ case.cut_off|date:"j.m, H:i" }} </b></li>
+        <li class="list-group-item">Opis: <b>{{ case.description }} </b></li>
+        <li class="list-group-item">Odprawa: <b>{% if case.customs %}<i class="fas fa-check"></i>{% else %}<i class="fas fa-times"></i>{% endif %}</b> / VGM: <b>{% if case.vgm %}<i class="fas fa-check"></i>{% else %}<i class="fas fa-times"></i>{% endif %}</b> / Invoice: <b>{% if case.invoice %}<i class="fas fa-check"></i>{% else %}<i class="fas fa-times"></i>{% endif %}</b></li>
+        <li class="list-group-item">SI: <b>{{ case.get_si_display }}</b> / COO: <b>{{ case.get_coo_display }}</b> / Ubezp. : <b>{{ case.get_insurance_display }}</b></li>
+        
+      </ul>
+      
+   
+
+      <div class="container border border-light rounded mt-5">
+        {% if documents %}
+        <h4>Lista dokumentów <i class="fas fa-folder-open"></i></h4>
+        <table class="table table-secondary">
+          <thead>
+            <tr>
+              <th scope="col">Rodzaj dokumentu / Opis</th>
+              <th scope="col">Nazwa pliku</th>
+              <th scope="col">Pobierz</th>
+            </tr>
+          </thead>
+        {% for document in documents %}
+          <tbody>
+            <tr>
+              <td>{{ document.title }}</td>
+              <td>{{ document.name_file }}</td>
+
+              <td>
+                <form method="post" action="/teczka/delete-document/{{ case.id }}/{{ document.id }}">
+                {% csrf_token %}
+                <a class="btn btn-success btn-sm" href="/static/{{ document.file }}"><i class="fas fa-file-download"></i></a>
+                <button type="submit" class="btn btn-danger btn-sm"><i class="fas fa-trash-alt"></i></button>
+                
+                </form>
+              </td>
+            </tr>
+          </tbody>  
+        {% endfor %}
+
+        </table>
+        
+        {% endif %}
+        
+
+        <h4 class="mb-3">Dodawanie dokumentów </h4>
+        <form method='post' action="/teczka/case-detail/{{ case.id }}" enctype="multipart/form-data">
+          {% csrf_token %}
+          <div class="input-group my-2">
+            <input class="form-control" type="text" placeholder="Rodzaj dokumentu" name="title">
+            <input class="form-control" required type="file" name="document">
+            <button class=" btn btn-primary"  type="submit">Dodaj dokument <i class="fas fa-file-upload"></i></button>
+          </div>
+        </form>
+
+      </div>
+
+
+    </div>
+  </div>
+
+
+
+
+
+<!-- Modal EDIT CASE -->
+<div class="modal fade" id="edit-case-{{ case.id }}" tabindex="-1" aria-labelledby="exampleModalLabelDodaj" aria-hidden="true">
+  <div class="modal-dialog">
+      <div class="modal-content">
+          <div class="modal-header">
+              <h5 class="modal-title" id="exampleModalLabelDodaj">Edycja spedycji {{ case.case_number }}</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+
+          <nav>
+              <div class="nav nav-tabs" id="nav-tab" role="tablist">
+                <button class="nav-link active" id="nav-home-tab" data-bs-toggle="tab" data-bs-target="#nav-home-{{case.id}}" type="button" role="tab" aria-controls="nav-home" aria-selected="true">Home</button>
+                <button class="nav-link" id="nav-profile-tab" data-bs-toggle="tab" data-bs-target="#nav-profile-{{case.id}}" type="button" role="tab" aria-controls="nav-profile" aria-selected="false">Zaawansowane</button>
+
+              </div>
+          </nav>
+
+          <form action="/teczka/edit-case/{{case.id}}"  method="post">
+              {% csrf_token %}
+              <div class="tab-content" id="nav-tabContent">
+                  <!-- Podstawowe -->
+                  <div class="tab-pane fade show active" id="nav-home-{{case.id}}" role="tabpanel" aria-labelledby="nav-home-tab">
+                      
+                      <div class="modal-body"> 
+                          <div class="input-group my-2">
+                              <span class="input-group-text w-25" id="basic-addon3">Draft BL:</span>
+                              
+                              <select class="form-select form-select" aria-label=".form-select example" name='si'>
+                                  <option {% if case.si == '' %} selected {% endif %} value="">-</option>     
+                                  <option {% if case.si == 'waiting' %} selected {% endif %}  value="waiting">Do wprowadzenia</option>
+                                  <option {% if case.si == 'submited' %} selected {% endif %} value="submited">Wprowadzone</option>
+                                  <option {% if case.si == 'checking' %} selected {% endif %}  value="checking">Wysłane do sprawdzenia</option>
+                                  <option {% if case.si == 'amended' %} selected {% endif %} value="amended">Wprowadzone poprawki</option>
+                                  <option {% if case.si == 'accepted' %} selected {% endif %}  value="accepted">Zaakceptowane</option>
+                                  <option {% if case.si == 'sent' %} selected {% endif %} value="sent">Oryginał wysłany</option>                                              
+                              </select> 
+                          </div>
+                          <div class="input-group my-2">
+                              <span class="input-group-text w-25" id="basic-addon3">Draft COO: </span>
+                              
+                              <select class="form-select form-select" aria-label=".form-select example" name='coo'>
+                                  <option {% if case.coo == '' %} selected {% endif %} value="">-</option>     
+                                  <option {% if case.coo == 'waiting' %} selected {% endif %}  value="waiting">Do wprowadzenia</option>
+                                  <option {% if case.coo == 'submited' %} selected {% endif %} value="submited">Wprowadzone</option>
+                                  <option {% if case.coo == 'checking' %} selected {% endif %}  value="checking">Wysłane do sprawdzenia</option>
+                                  <option {% if case.coo == 'amended' %} selected {% endif %} value="amended">Wprowadzone poprawki</option>
+                                  <option {% if case.coo == 'accepted' %} selected {% endif %}  value="accepted">Zaakceptowane</option>
+                                  <option {% if case.coo == 'sent' %} selected {% endif %} value="sent">Oryginał wysłany</option>                                              
+                              </select> 
+                          </div>
+                          <div class="input-group my-2">
+                              <span class="input-group-text w-25" id="basic-addon3">Ubezpieczenie: </span>
+                              
+                              <select class="form-select form-select" aria-label=".form-select example" name='insurance'>
+                                  <option {% if case.insurance == '' %} selected {% endif %} value="">-</option>     
+                                  <option {% if case.insurance == 'waiting' %} selected {% endif %}  value="waiting">Do wprowadzenia</option>
+                                  <option {% if case.insurance == 'submited' %} selected {% endif %} value="submited">Wprowadzone</option>
+                                  <option {% if case.insurance == 'checking' %} selected {% endif %}  value="checking">Wysłane do sprawdzenia</option>
+                                  <option {% if case.insurance == 'amended' %} selected {% endif %} value="amended">Wprowadzone poprawki</option>
+                                  <option {% if case.insurance == 'accepted' %} selected {% endif %}  value="accepted">Zaakceptowane</option>
+                                  <option {% if case.insurance == 'sent' %} selected {% endif %} value="sent">Oryginał wysłany</option>                                              
+                              </select> 
+                          </div>
+                          <div class="form-check">
+                              <input class="form-check-input" type="checkbox" value="" id="defaultCheck1" name='customs'>
+                              <label class="form-check-label" for="defaultCheck1">
+                                Odprawione
+                              </label>
+                          </div>
+                          <div class="form-check">
+                              <input class="form-check-input" type="checkbox" value="" id="defaultCheck2" name='invoice'>
+                              <label class="form-check-label" for="defaultCheck2">
+                                Faktura wystawiona
+                              </label>
+                          </div>
+
+                              
+                              <textarea class="form-control mt-2"  rows="2" placeholder="Opcjonalny opis.." name="description" >{{case.description}}</textarea>
+                              <textarea class="form-control mt-2"  rows="1" placeholder="Numery kontenerów" name="container_numbers" >{{case.container_numbers}}</textarea>
+                      
+
+                          
+                          <div class="input-group my-2">
+                              <span class="input-group-text" id="basic-addon3"><b>Status spedycji:</b> </span>
+                              
+                              <select class="form-select form-select" aria-label=".form-select example" name='case_status'>
+                                   
+                                  <option {% if case.case_status == 'active' %} selected {% endif %}  value="active">W trakcie</option>
+                                  <option {% if case.case_status == 'ended' %} selected {% endif %} value="ended">Zakończona</option>
+                                  
+                              </select> 
+                          </div>
+              
+                      </div>     
+                      
+                  </div>
+                  <!-- Zaawansowane -->
+                  <div class="tab-pane fade" id="nav-profile-{{case.id}}" role="tabpanel" aria-labelledby="nav-profile-tab">
+                      <div class="modal-body">
+                          <div class="container">
+                              <div class="row my-2">
+                                  <input type="text" class="form-control  col" placeholder="Numer spedycji"name='case_number' value='{{ case.case_number }}'>
+                                  <input type="text" class="form-control ms-2 col" placeholder="Firma" name='company' value='{{ case.company }}'>   
+                                  <input type="text" class="form-control ms-2 col" placeholder="Rok" name='year' value='{{ case.year }}'>  
+                              </div> 
+                              <div class="row my-2">
+                                  
+                                  <input type="text" class="form-control  col" placeholder="Booking" name='booking' value='{{ case.booking }}'>
+                                  
+                                  <input type="text" class="form-control ms-2 col" placeholder="Oferta" name='offer_number' value='{{ case.offer_number }}'>
+                                     
+                              </div>
+                              <div class="row my-2">
+                                  <input type="text" class="form-control me-1 col" placeholder="Port załadunku" name='loading_port' value='{{ case.loading_port }}'>
+                                  <input type="text" class="form-control ms-1 col" placeholder="Destynacja" name='destination' value='{{ case.destination }}'>    
+                              </div>
+                          </div>  
+      
+      
+                          <select class="form-select form-select my-2" aria-label=".form-select example" name='shipowner'>
+                                      <option {% if case.shipowner == 'maersk' %} selected {% endif %}  value="maersk">Maersk Line</option>
+                                      <option {% if case.shipowner == 'cma' %} selected {% endif %} value="cma">CMA</option>
+                                      <option {% if case.shipowner == 'msc' %} selected {% endif %} value="msc">MSC</option>
+                                      <option {% if case.shipowner == 'hapag' %} selected {% endif %} value="hapag">Hapag Lloyd</option>
+                                  </select> 
+                       
+                          <div class="input-group my-2">
+                              <span class="input-group-text" id="basic-addon3">ETD: </span>
+                              <input type="date" class="form-control" name="etd" aria-describedby="basic-addon3" value='{{ case.etd|date:"Y-m-d" }}'>
+                              <span class="input-group-text" id="basic-addon3">ETA: </span>
+                              <input type="date" class="form-control" name="eta" aria-describedby="basic-addon3" value='{{ case.eta|date:"Y-m-d" }}'>
+                          </div>
+                          <div class="input-group my-2">
+                              <span class="input-group-text" id="basic-addon3">Cut off: </span>
+                              <input type="datetime-local" class="form-control" name="cut_off" aria-describedby="basic-addon3" value='{{case.cut_off|date:"Y-m-d"}}T{{case.cut_off|time:"H:i:s"}}'>
+                          </div>
+                                          
+
+
+                          <div class="input-group my-2">
+                              <span class="input-group-text" id="basic-addon3">Ilość kont: </span>
+                              <input type="number" placeholder="Ilość" class="form-control" name="amount" aria-describedby="basic-addon3" value='{{ case.amount }}'>
+                              <select class="form-select form-select" aria-label=".form-select example" name='container_type'>
+                                  <option value="40dv" {% if case.container_type == '40dv' %} selected {% endif %}>40 dv</option>
+                                  <option value="40hc" {% if case.container_type == '40hc' %} selected {% endif %}>40 hc</option>
+                                  <option value="40rf" {% if case.container_type == '40rf' %} selected {% endif %}>40 rf</option>
+                                  <option value="20dv" {% if case.container_type == '20dv' %} selected {% endif %}>20 dv</option>
+                                  <option value="20rf" {% if case.container_type == '20rf' %} selected {% endif %}>20 rf</option>
+                              </select> 
+                          </div>   
+      
+                          <div class="input-group my-2">
+                              <span class="input-group-text" id="basic-addon3">Data załadunku: </span>
+                              <input type="date" class="form-control" name="loading_data" aria-describedby="basic-addon3" value='{{ case.loading_data|date:"Y-m-d" }}'><input type="text" class="form-control col" placeholder="Miejsce zał." name='load_place' value='{{ case.load_place }}'>   
+                          </div>
+                          
+                          <input type="radio" class="btn-check" name="options-outlined" id="select-export" autocomplete="off" checked>
+                          <label class="btn btn-outline-primary" for="select-export">Export</label>
+                          
+                          <input type="radio" class="btn-check" name="options-outlined" id="select-import" autocomplete="off">
+                          <label class="btn btn-outline-primary" for="select-import">Import</label>
+                      </div>                                
+                  </div>
+
+
+                  <div class="modal-footer">
+                      <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Zamknij</button>
+                      <button type="submit" class="btn btn-primary">Zapisz</button>
+                  </div>
+              </div>
+          </form>
+      </div>
+  </div>
+</div>
+
+
+{% endblock %}

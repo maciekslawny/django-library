@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+
+{% block content %}
+
+<h3>Przyszłe załadunki</h3>
+
+
+<table class="table table-hover">
+    <thead>
+        <tr>
+            <th class="col">Firma</th>
+            <th class="col">Spedycja</th>
+            <th class="col">Data zał.</th>
+            <th class="col">Miejsce zał.</th>            
+            <th class="col">Cut off</th>
+
+        </tr>
+    </thead>
+    <tbody>
+        {% for case in cases %}
+
+        <tr>
+            <th scope="row">{{ case.company }}</th>
+            <td>{{ case.case_number }}</td>
+            <td>{{ case.loading_data|date:"j.m" }}</td>
+            <td>{{ case.load_place }}</td>            
+            <td>{{ case.cut_off|date:"j.m, H:i " }}</td>
+
+
+        </tr>
+        {% endfor %}
+    </tbody>
+
+</table>
+
+
+
+
+{% endblock %}
